@@ -1,4 +1,7 @@
 #####################################################
+# Li, Xin[932252493]:                               #
+#---------------------------------------------------#                                                   
+#####################################################
 # The first homework for Deep Learning, which is to #
 # compose a one layer fully connected 2-class clas- #
 # sification net.                                   #  
@@ -11,9 +14,9 @@ import numpy
 
 ########### My Neural Network ########################
 class MyOneLayerFullyConnectedNet(Object):
-	def __init__(self, x, y, param):
-		self.x = x # input
-		self.y = y # output
+	def __init__(self, train_data, train_label, param):
+		self.train_data = train_data # input
+		self.train_label = train_label # output
 		self.numOfLayers = len(param)
 		self.numOfNeuronsForAllLayers = [attr[0] for attr in param] # one-hidden 
 		self.activationFunction = [attr[1] for attr in param]
@@ -37,12 +40,14 @@ class MyOneLayerFullyConnectedNet(Object):
 			self.inputs.append(numpy.zeros((n, 1)))
 			self.outputs.append(numpy.zeros((n, 1)))
 			self.errors.append(numpy.zeors((n, 1)))
+		# end
+
 		# last layer is output 
 		n = self.size[-1]
 		self.imputs.append(numpy.zeros((n, 1)))
 		self.outputs.append(numpy.zeros((n, 1)))
 		self.errors.append(numpy.zeros((n, 1)))
-	# end
+	## end ######################################################################################
 
 	def feedForward(self, x):
 		dim = len(x) 
@@ -56,14 +61,29 @@ class MyOneLayerFullyConnectedNet(Object):
 		return self.outputs[-1] # output the final result
 	## end #########################################################################
 
-	def updateWeights(self, x, y, stepSize): # this is where backprobagation lies.
+	def updateWeights(self, data, label, stepSize):	
 		# Go forward
-		self.feedForward(x)
+		self.feedForward(data)
 		# Go backward
-		nabla_weights, nabla_biases = self.backPropagate(y)
+		nabla_weights, nabla_biases = self.backPropagate(label)
 		# Start updating
 		for 
 			
+		# end
+	## end ######################################################################### 
+
+	def stocastichMiniBatchGradientDescent(self, miniBatchSize = 128, stepSize = 1, epoch = 1000):
+		dataSize = self.train_data.shape[0]
+		randSerie = numpy.random.randint(dataSize, size = dataSize)
+		
+		for itr in range(epoch):
+			# Extract my mini-batch randomly
+			miniBatchData = self.train_data[randSerie[itr * miniBatchSize + itr * miniBatchSize + miniBatchSize - 1]]
+			miniBatchLabel = self.train_label[randSerie[itr * miniBatchSize + itr * miniBatchSize + miniBatchSize - 1]]
+			# Start updating weights
+			for i in range(miniBatchSize)
+				self.updateWeights(miniBatchData, miniBatchLabel)
+			# end
 		# end
 	## end #########################################################################
 
@@ -93,6 +113,7 @@ class MyOneLayerFullyConnectedNet(Object):
 	def predict(x)
 		
 	## end #########################################################################
-########### My other functions  ######################
+
+### end ###
 
 
