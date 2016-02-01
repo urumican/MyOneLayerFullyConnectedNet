@@ -1,5 +1,5 @@
 #####################################################
-# Li, Xin [932252493]:                              #                                                   
+# Li, Xin:                                          #                                                   
 #####################################################
 # The first homework for Deep Learning, which is to #
 # compose a one layer fully connected 2-class clas- #
