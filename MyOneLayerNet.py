@@ -1,6 +1,5 @@
 #####################################################
-# Li, Xin[932252493]:                               #
-#---------------------------------------------------#                                                   
+# Li, Xin [932252493]:                               #                                                   
 #####################################################
 # The first homework for Deep Learning, which is to #
 # compose a one layer fully connected 2-class clas- #
@@ -30,6 +29,7 @@ class MyOneLayerFullyConnectedNet(Object):
 		self.imputs = []
 		self.outputs = []
 		self.errors = []
+		
 		# Initiate Weights using variable 
 		for layer in range(self.numOfHiddenLayers - 1):
 			# Weight matrices should be m-by-n 
@@ -61,31 +61,40 @@ class MyOneLayerFullyConnectedNet(Object):
 		return self.outputs[-1] # output the final result
 	## end #########################################################################
 
-	def updateWeights(self, data, label, stepSize):	
-		# Go forward
-		self.feedForward(data)
-		# Go backward
-		nabla_weights, nabla_biases = self.backPropagate(label)
-		# Start updating
-		for 
-			
-		# end
+	def updateWeights(self, dataBatch, labelBatch, batchSize, stepSize):
+		# Define a empty increment matrix
+		delta_w = [numpy.zeros(w.shape) for w in self.weights]
+		delta_b = [numpy.zeros(b.shape) for b in self.biases]
+		# Generate Increments
+		for i in range(batchSize):
+			data = databatch[i]
+			label = labelBatch[i]
+			# Go forward
+			self.feedForward(data)
+			# Go backward
+			nabla_weights, nabla_biases = self.backPropagate(label)
+			# Start updating
+			for layer in xrange(self.numOfLayers - 2) 
+				delta_w[layer] += nabla_w[layer]
+				delta_b[layer] += nabla_b[layer]
+			# end #
+		# end #
+		self.weights = [w - dw * (stepSize / batchSize) for w, dw in self.weights, delta_w]
+		self.biases = [b - db * (stepSize / batchSize) for b, db in self.biases, delta_b]
+		
 	## end ######################################################################### 
 
-	def stocastichMiniBatchGradientDescent(self, miniBatchSize = 128, stepSize = 1, epoch = 1000):
+	def stochasticMiniBatchGradientDescent(self, miniBatchSize = 128, stepSize = 1, epoch = 1000):
 		dataSize = self.train_data.shape[0]
 		randSerie = numpy.random.randint(dataSize, size = dataSize)
 		
 		for itr in range(epoch):
 			# Extract my mini-batch randomly
-			miniBatchData = self.train_data[randSerie[itr * miniBatchSize + itr * miniBatchSize + miniBatchSize - 1]]
-			miniBatchLabel = self.train_label[randSerie[itr * miniBatchSize + itr * miniBatchSize + miniBatchSize - 1]]
-			# Start updating weights
-			for i in range(miniBatchSize)
-				self.updateWeights(miniBatchData, miniBatchLabel)
-			# end
+			miniBatchData = self.train_data[randSerie[itr * miniBatchSize : itr * miniBatchSize + miniBatchSize - 1]]
+			miniBatchLabel = self.train_label[randSerie[itr * miniBatchSize : itr * miniBatchSize + miniBatchSize - 1]]
+			self.updateWeights(miniBatchsize, miniBatchData, miniBatchLabel, stepSize)
 		# end
-	## end #########################################################################
+	## end ##
 
 	######### My backpropagation is used to calculate all errors at once. ##########
 	def backPropagate(self, y):
@@ -108,12 +117,4 @@ class MyOneLayerFullyConnectedNet(Object):
 		# end	
 		
 		return (nabla_weights, nabla_biases)
-	## end #########################################################################
-	
-	def predict(x)
-		
-	## end #########################################################################
-
-### end ###
-
-
+	## end ##
