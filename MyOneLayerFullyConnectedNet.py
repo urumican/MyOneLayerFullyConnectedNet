@@ -1,5 +1,5 @@
 #####################################################
-# Li, Xin:                                          #                                                   
+#                   Li, Xin                         #                                                   
 #####################################################
 # The first homework for Deep Learning, which is to #
 # compose a one layer fully connected 2-class clas- #
@@ -11,8 +11,14 @@
 
 import numpy
 
-########### My Neural Network ########################
+### My Neural Network ###
 class MyOneLayerFullyConnectedNet(Object):
+
+	## Param's format:
+	## 	Param is a tupple. The number of elements in this tuple
+	##      equals to the number of layers. Each element is a tuple
+	##	containing three kind of information, number of neurons,
+	##      activation function, and derivative of activation function.	
 	def __init__(self, train_data, train_label, param):
 		self.train_data = train_data # input
 		self.train_label = train_label # output
@@ -21,7 +27,7 @@ class MyOneLayerFullyConnectedNet(Object):
 		self.activationFunction = [attr[1] for attr in param]
 		self.activationPrime = [attr[2] for attr in param]
 		self.build();
-	# end
+	## end ##
 
 	def build(self):
 		self.weights = [] # Weights matrices for all layers.
@@ -40,14 +46,14 @@ class MyOneLayerFullyConnectedNet(Object):
 			self.inputs.append(numpy.zeros((n, 1)))
 			self.outputs.append(numpy.zeros((n, 1)))
 			self.errors.append(numpy.zeors((n, 1)))
-		# end
+		# end #
 
 		# last layer is output 
 		n = self.size[-1]
 		self.imputs.append(numpy.zeros((n, 1)))
 		self.outputs.append(numpy.zeros((n, 1)))
 		self.errors.append(numpy.zeros((n, 1)))
-	## end ######################################################################################
+	## end ##
 
 	def feedForward(self, x):
 		dim = len(x) 
@@ -58,8 +64,9 @@ class MyOneLayerFullyConnectedNet(Object):
 		for i in range(1, self.numOfLayers):
 			self.inputs[i] = slef.weights[i-1].dot(self.inputs[i-1]) + self.biases[i-1]
 			self.outputs[i] = self.activationFunction[i](self.inputs[i])
+		# end #
 		return self.outputs[-1] # output the final result
-	## end #########################################################################
+	## end ##
 
 	def updateWeights(self, dataBatch, labelBatch, batchSize, stepSize):
 		# Define a empty increment matrix
@@ -82,21 +89,21 @@ class MyOneLayerFullyConnectedNet(Object):
 		self.weights = [w - dw * (stepSize / batchSize) for w, dw in self.weights, delta_w]
 		self.biases = [b - db * (stepSize / batchSize) for b, db in self.biases, delta_b]
 		
-	## end ######################################################################### 
+	## end ##
 
 	def stochasticMiniBatchGradientDescent(self, miniBatchSize = 128, stepSize = 1, epoch = 1000):
 		dataSize = self.train_data.shape[0]
 		randSerie = numpy.random.randint(dataSize, size = dataSize)
 		
-		for itr in range(epoch):
+		for itr in range(epoch)
 			# Extract my mini-batch randomly
 			miniBatchData = self.train_data[randSerie[itr * miniBatchSize : itr * miniBatchSize + miniBatchSize - 1]]
 			miniBatchLabel = self.train_label[randSerie[itr * miniBatchSize : itr * miniBatchSize + miniBatchSize - 1]]
 			self.updateWeights(miniBatchsize, miniBatchData, miniBatchLabel, stepSize)
-		# end
+		# end #
 	## end ##
 
-	######### My backpropagation is used to calculate all errors at once. ##########
+	## My backpropagation is used to calculate all errors at once. ##
 	def backPropagate(self, y):
 		#initialize matrices for derivative of W and b
 		nabla_weights = [numpy.zeros(w.shape) for w in self.weights]
@@ -114,7 +121,17 @@ class MyOneLayerFullyConnectedNet(Object):
 			nabla_weights[layer] = numpy.dot(self.errors[layer], self.output[layer-1].transpose())
 			# Calculate nabla_loss / nabla_b_l.
 			nabla_biases[layer] = self.errors[layer]
-		# end	
+		# end #	
 		
 		return (nabla_weights, nabla_biases)
+
 	## end ##
+	
+	## Data should be predicted one by one.
+	## I do not support batch prediction for now	
+	def prediction(self, data):
+		return self.feedForward(data)
+
+	## end ##
+
+### end ###
