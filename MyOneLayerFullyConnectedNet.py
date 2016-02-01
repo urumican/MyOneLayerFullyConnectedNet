@@ -1,5 +1,5 @@
 #####################################################
-#                   Li, Xin                         #                                                   
+# Li, Xin [932252493]:                              #                                                   
 #####################################################
 # The first homework for Deep Learning, which is to #
 # compose a one layer fully connected 2-class clas- #
@@ -86,8 +86,8 @@ class MyOneLayerFullyConnectedNet(Object):
 				delta_b[layer] += nabla_b[layer]
 			# end #
 		# end #
-		self.weights = [w - dw * (stepSize / batchSize) for w, dw in self.weights, delta_w]
-		self.biases = [b - db * (stepSize / batchSize) for b, db in self.biases, delta_b]
+		self.weights = [w - dw * (stepSize / batchSize) for w, dw in zip(self.weights, delta_w)]
+		self.biases = [b - db * (stepSize / batchSize) for b, db in zip(self.biases, delta_b)]
 		
 	## end ##
 
@@ -109,7 +109,7 @@ class MyOneLayerFullyConnectedNet(Object):
 		nabla_weights = [numpy.zeros(w.shape) for w in self.weights]
 		nabla_biases = [numpy.zeros(b.shape) for b in self.biases]
 		# Calculate error for the output layer
-		self.errors[-1] = self.lossPrime(self.output[-1], y) * self.activationPrime[-1](self.inputs[-1])
+		self.errors[-1] = [self.lossPrime(o, l) * self.activationPrime[-1](i) for i, o, l, in zip(self.inputs[-1], self.outputs[-1], y)] 
 		nabla_bias[-1] = self.errors[-1]
 		nabla_weights[-1] = numpy.dot(self.errors[-1], self.outputs[-2].T)
 		
