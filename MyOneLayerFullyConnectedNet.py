@@ -1,5 +1,5 @@
 #####################################################
-# Li, Xin:                              #                                                   
+# Li, Xin:                                          #                                                   
 #####################################################
 # The first homework for Deep Learning, which is to #
 # compose a one layer fully connected 2-class clas- #
@@ -11,7 +11,7 @@
 
 import numpy
 import ActivationFunctionsMaster
-import 
+import LossFunctionsMaster
 
 ### My Neural Network ###
 class MyOneLayerFullyConnectedNet(Object):
@@ -150,8 +150,11 @@ class MyOneLayerFullyConnectedNet(Object):
 	## Data should be predicted one by one.
 	## I do not support batch prediction for now	
 	def prediction(self, data):
-		return self.feedForward(data)
-
+		out = self.feedForward(data)
+		if out > 1 - out:
+			return 1
+		else
+			return 0
 	## end ##
 
 ### end ###
