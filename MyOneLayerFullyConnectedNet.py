@@ -152,9 +152,9 @@ class MyOneLayerFullyConnectedNet(Object):
 	def prediction(self, data):
 		out = self.feedForward(data)
 		if out > 1 - out:
-			return 1
-		else
 			return 0
+		else
+			return 1
 	## end ##
 
 ### end ###
