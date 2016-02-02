@@ -10,8 +10,6 @@
 #####################################################
 
 import numpy
-import ActivationFunctionsMaster
-import LossFunctionsMaster
 
 ### My Neural Network ###
 class MyOneLayerFullyConnectedNet(Object):
