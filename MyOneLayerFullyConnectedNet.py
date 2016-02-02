@@ -22,7 +22,7 @@ class MyOneLayerFullyConnectedNet(Object):
 	##	containing three kind of information, number of neurons,
 	##      activation function, and derivative of activation function.	
 	def __init__(self, train_data, train_label, param):
-		self.train_data = train_data # input
+		self.train_data = train_data # input data are all row vector
 		self.train_label = train_label # output
 		self.numOfLayers = len(param)
 		self.numOfNeuronsForAllLayers = [attr[0] for attr in param] # one-hidden 
@@ -41,20 +41,20 @@ class MyOneLayerFullyConnectedNet(Object):
 		# Initiate Weights using variable 
 		for layer in range(self.numOfHiddenLayers - 1):
 			# Weight matrices should be m-by-n 
-			n = self.numOfNeuronsForAllLayers[layer]
-			m =  self.numOfNeuronsForAllLayers[layer+1]
+			m = self.numOfNeuronsForAllLayers[layer] # input dim
+			n =  self.numOfNeuronsForAllLayers[layer+1] # output dim
 			self.weights.append(numpy.random.normal(0, 1, (m, n)))
-			self.biases.append(numpy.random.normal(0, 1, (m, 1)))
-			self.inputs.append(numpy.zeros((n, 1)))
-			self.outputs.append(numpy.zeros((n, 1)))
-			self.errors.append(numpy.zeors((n, 1)))
+			self.biases.append(numpy.random.normal(0, 1, (1, n)))
+			self.inputs.append(numpy.zeros((1, m)))
+			self.outputs.append(numpy.zeros((1, m)))
+			self.errors.append(numpy.zeors((1, m)))
 		# end #
 
 		# last layer is output 
-		n = self.size[-1]
-		self.imputs.append(numpy.zeros((n, 1)))
-		self.outputs.append(numpy.zeros((n, 1)))
-		self.errors.append(numpy.zeros((n, 1)))
+		n = self.numOfNeuronsForAllLayers[-1]
+		self.imputs.append(numpy.zeros((1, n)))
+		self.outputs.append(numpy.zeros((1, n)))
+		self.errors.append(numpy.zeros((1, n)))
 	## end ##
 
 	def feedForward(self, x):
@@ -64,8 +64,8 @@ class MyOneLayerFullyConnectedNet(Object):
 		self.imputs[0] = x
 		self.outputs[0] = x
 		for i in range(1, self.numOfLayers):
-			self.inputs[i] = slef.weights[i-1].dot(self.inputs[i-1]) + self.biases[i-1]
-			self.outputs[i] = self.activationFunction[i](self.inputs[i])
+			self.inputs[i] = numpy.dot(self.inputs[i-1], self.weights[i-1]) + self.bias[i-1] 
+			self.outputs[i] = [self.activationFunction[i](n) for n in self.inputs[i]]
 		# end #
 		return self.outputs[-1] # output the final result
 	## end ##
@@ -83,8 +83,6 @@ class MyOneLayerFullyConnectedNet(Object):
 			# Go backward
 			nabla_weights, nabla_biases = self.backPropagate(label)
 			# Accumulate Gradients for this batch
-			#delta_w += [d_w for d_w in nabla_w]
-			#delta_b += [d_b for d_b in nabla_b]  
 			for layer in xrange(self.numOfLayers - 2) 
 				delta_w_t[layer] += nabla_w[layer]
 				delta_b_t[layer] += nabla_b[layer]
@@ -136,9 +134,10 @@ class MyOneLayerFullyConnectedNet(Object):
 		# Start backPropagation, calculate from the second-last layers.
 		for layer in xrange(self.numOfLayer - 2, 0, -1):
 			# Note that the w_l equals to the matrix corresponding to the index 'l-1.
-			self.errors[layer] = numpy.dot(self.weights[layer].T, self.errors[layer+1]) * self.activationPrime(self.inputs[layer])
+			activPrime = numpy.array([self.activationPrime(i) for i in self.inputs[layer]])
+			self.errors[layer] = numpy.dot(self.weights[layer], self.errors[layer+1]) * activPrime
 			# Calcualte nabla_Loss / nabla_w_l. 
-			nabla_weights[layer] = numpy.dot(self.errors[layer], self.output[layer-1].transpose())
+			nabla_weights[layer] = numpy.outer(self.output[layer-1], self.errors[layer])
 			# Calculate nabla_loss / nabla_b_l.
 			nabla_biases[layer] = self.errors[layer]
 		# end #	
@@ -152,9 +151,9 @@ class MyOneLayerFullyConnectedNet(Object):
 	def prediction(self, data):
 		out = self.feedForward(data)
 		if out > 1 - out:
-			return 0
-		else
 			return 1
+		else
+			return 0
 	## end ##
 
 ### end ###
