@@ -1,5 +1,5 @@
 #####################################################
-# Li, Xin:                                          #                                                   
+# Li, Xin:                              #                                                   
 #####################################################
 # The first homework for Deep Learning, which is to #
 # compose a one layer fully connected 2-class clas- #
@@ -10,6 +10,8 @@
 #####################################################
 
 import numpy
+import ActivationFunctionsMaster
+import 
 
 ### My Neural Network ###
 class MyOneLayerFullyConnectedNet(Object):
@@ -68,8 +70,8 @@ class MyOneLayerFullyConnectedNet(Object):
 		return self.outputs[-1] # output the final result
 	## end ##
 
-	def updateWeights(self, dataBatch, labelBatch, batchSize, stepSize):
-		# Define a empty increment matrix
+	def updateWeights(self, dataBatch, labelBatch, batchSize, stepSize, gamma):
+		# Define a empty increment matrix for momentum
 		delta_w = [numpy.zeros(w.shape) for w in self.weights]
 		delta_b = [numpy.zeros(b.shape) for b in self.biases]
 		# Generate Increments
@@ -80,26 +82,44 @@ class MyOneLayerFullyConnectedNet(Object):
 			self.feedForward(data)
 			# Go backward
 			nabla_weights, nabla_biases = self.backPropagate(label)
-			# Start updating
+			# Accumulate Gradients for this batch
+			#delta_w += [d_w for d_w in nabla_w]
+			#delta_b += [d_b for d_b in nabla_b]  
 			for layer in xrange(self.numOfLayers - 2) 
-				delta_w[layer] += nabla_w[layer]
-				delta_b[layer] += nabla_b[layer]
+				delta_w_t[layer] += nabla_w[layer]
+				delta_b_t[layer] += nabla_b[layer]
 			# end #
 		# end #
-		self.weights = [w - dw * (stepSize / batchSize) for w, dw in zip(self.weights, delta_w)]
-		self.biases = [b - db * (stepSize / batchSize) for b, db in zip(self.biases, delta_b)]
+		
+		return (delta_w, delta_b)
+
+		#self.weights = [w - dw * (stepSize / batchSize) for w, dw in zip(self.weights, delta_w)]
+		#self.biases = [b - db * (stepSize / batchSize) for b, db in zip(self.biases, delta_b)]
 		
 	## end ##
 
-	def stochasticMiniBatchGradientDescent(self, miniBatchSize = 128, stepSize = 1, epoch = 1000):
+	def stochasticMiniBatchGradientDescentWithMomentum(self, miniBatchSize = 100, stepSize = 1, epoch = 1000, gamma = 0.5):
+		# Get the size of the data. 
 		dataSize = self.train_data.shape[0]
-		randSerie = numpy.random.randint(dataSize, size = dataSize)
-		
-		for itr in range(epoch)
-			# Extract my mini-batch randomly
-			miniBatchData = self.train_data[randSerie[itr * miniBatchSize : itr * miniBatchSize + miniBatchSize - 1]]
-			miniBatchLabel = self.train_label[randSerie[itr * miniBatchSize : itr * miniBatchSize + miniBatchSize - 1]]
-			self.updateWeights(miniBatchsize, miniBatchData, miniBatchLabel, stepSize)
+		for itr in range(epoch):
+			randSerie = numpy.random.randint(dataSize, size = dataSize)
+			numOfBatch = dataSize / miniBatchSize
+			# Create Momentum variable
+			momentum_w = [numpy.zeros(w.shape) for w in this.weights]
+			momentum_b = [numpy.zeros(b.shape) for b in this.biases] 
+			# Start batch gradient descent
+			for i in range(numOfBatch)
+				# Extract my mini-batch randomly
+				miniBatchData = self.train_data[randSerie[i * miniBatchSize : i * miniBatchSize + miniBatchSize - 1]]
+				miniBatchLabel = self.train_label[randSerie[i * miniBatchSize : i * miniBatchSize + miniBatchSize - 1]]
+				# Get Increment
+				delta_w, delta_b = self.updateWeights(miniBatchsize, miniBatchData, miniBatchLabel, stepSize)
+				momentum_w = [gamma * mw - stepSize * dw for dw, mw in delta_w, momentum_w]
+				momentum_b = [gamma * mb - stepSize * db for db, mb in delta_b, momentum_b]	
+				# Updata weights
+				self.weights = [w + mw for w, mw in self.weights, momentum_w]
+				self.biases = [b + mb for b, mb in self.biases, momentum_b]
+			# end #
 		# end #
 	## end ##
 
