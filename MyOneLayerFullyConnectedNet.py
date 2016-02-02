@@ -129,7 +129,7 @@ class MyOneLayerFullyConnectedNet(Object):
 		# Calculate error for the output layer
 		self.errors[-1] = [self.lossPrime(o, l) * self.activationPrime[-1](i) for i, o, l, in zip(self.inputs[-1], self.outputs[-1], y)] 
 		nabla_bias[-1] = self.errors[-1]
-		nabla_weights[-1] = numpy.dot(self.errors[-1], self.outputs[-2].T)
+		nabla_weights[-1] = numpy.outer(self.outputs[-2], self.errors[-1])
 		
 		# Start backPropagation, calculate from the second-last layers.
 		for layer in xrange(self.numOfLayer - 2, 0, -1):
