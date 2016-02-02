@@ -21,13 +21,15 @@ class MyOneLayerFullyConnectedNet(Object):
 	##      equals to the number of layers. Each element is a tuple
 	##	containing three kind of information, number of neurons,
 	##      activation function, and derivative of activation function.	
-	def __init__(self, train_data, train_label, param):
+	def __init__(self, train_data, train_label, param, loss, lossPrime):
 		self.train_data = train_data # input data are all row vector
 		self.train_label = train_label # output
 		self.numOfLayers = len(param)
 		self.numOfNeuronsForAllLayers = [attr[0] for attr in param] # one-hidden 
 		self.activationFunction = [attr[1] for attr in param]
 		self.activationPrime = [attr[2] for attr in param]
+		self.lossFunction = loss
+		self.lossPrime = lossPrime
 		self.build();
 	## end ##
 
