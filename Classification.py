@@ -1,5 +1,5 @@
 import numpy
-import MyOneLayerFullyConnectedNet
+from MyOneLayerFullyConnectedNet import *
 import cPickle
 from scipy.special import expit
 
@@ -12,24 +12,29 @@ def identityFuncPrime(x):
 # end # 
 
 def relu(x):
-	if x > 0:
-		return x
-	else:
-		return 0.0
+	return (numpy.absolute(x) + x) / 2
 # end #
 
 def relu_prime(x):
-	if x > 0:
-		return 1.0
-	elif x == 0:
-		return 0.5
-	else: 
-		return 0.0
+	xShape = x.shape
+	s = x[0]
+	ret = []
+	for i in range(xShape[1]):
+		if s[i] > 0:
+			ret.append(1.0)
+		elif s[i] == 0:
+			ret.append(0.5)
+		else: 
+			ret.append(0.0)
+	ret = numpy.array(ret)
+	ret.shape = xShape
+	return ret
 # end #
 
 
 def crossEntropy(x, y):
-	return y * numpy.log(x) + (1.0 - y) * log(1.0 - x)
+	#print 'output:', x
+	return y * numpy.log(x) + (1.0 - y) * numpy.log(1.0 - x)
 # end #
 
 def corssEngtropyPrime(x, y):
@@ -40,7 +45,7 @@ def sigmoid(x):
 	return (1.0 / (1.0 + numpy.exp(-x)))
 # end #
 
-def sigmod_prime(x):
+def sigmoid_prime(x):
 	return numpy.exp(-x) / (1.0 + numpy.exp(-x))**2
 
 
@@ -48,18 +53,23 @@ def sigmod_prime(x):
 def main():
 	# Import data
 	dic = cPickle.load(open("cifar_2class_py2.p","rb"))
-	train_data = dic['train_data']
-	train_label = dic['train_label']
-	test_data = dic['test_data']
-	test_label = dic['test_label']
+	train_data = (dic['train_data'] - dic['train_data'].mean(0)) / dic['train_data'].std(0) 
+	#train_data = dic['train_data'] / 255
+	train_label = dic['train_labels']	
+	test_data = (dic['test_data'] - dic['test_data'].mean(0)) / dic['test_data'].std(0)
+	#test_data = dic['test_data'] / 255
+	test_label = dic['test_labels'] 
 
 	# Create layer-level parameter
 	# Parameter format:
 	# [num, activation function, derivative of activation function]
-	specification = ((train_data.shape[2], 0, 0), (10, relu, relu_prime), (1, expit, sigmoid_prime))	
+	specification = ((train_data.shape[1], 0, 0), (10, relu, relu_prime), (1, expit, sigmoid_prime))	
 	
 	# Create new net
-	net = MyOneLayerfullyConnectedNet(train_data, train_label, specification, crossEntropy, crossEntropyPrime)
+	net = MyOneLayerFullyConnectedNet(train_data, train_label, test_data, test_label, specification, crossEntropy, corssEngtropyPrime)
 	net.stochasticMiniBatchGradientDescentWithMomentum()
 	
 # end #
+
+if __name__ == "__main__":
+    main()
