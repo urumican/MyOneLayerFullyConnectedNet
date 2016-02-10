@@ -53,17 +53,23 @@ class MyOneLayerFullyConnectedNet:
 	## end ##
 
 	## My backpropagation is used to calculate all errors at once. ##
-	def backPropagate(self, y):
+	def getIncrements(self, y):
+		nabla_weights = [numpy.zeros(w.shape) for w in self.weights]
+		nabla_biases = [numpy.zeros(b.shape) for b in self.biases]
+
 		# Calculate error for the output layer, it is matrix operation
 		self.errors[-1] = self.outputs[-1] - y
+		nabla_biases[-1] = self.errors[-1]
+		nabla_weights[-1] = numpy.dot(self.outputs[-2].transpose(), self.errors[-1])
 
-		self.nabla_biases[-1] = self.errors[-1]
-		self.nabla_weights[-1] = numpy.dot(self.outputs[-2].transpose(), self.errors[-1])
 		for layer in range(2, self.numOfLayers):
 			activPrime  = self.activationPrime[-layer](self.inputs[-layer])
 			self.errors[-layer] = numpy.dot(self.errors[-(layer - 1)], self.weights[-(layer - 1)].transpose()) * activPrime # activPrime is k-by-n
-			self.nabla_weights[-layer] = numpy.outer(self.outputs[-(layer + 1)].transpose(), self.errors[-layer]) # error at current layer is k-by-n
-			self.nabla_biases[-layer] = numpy.dot(numpy.ones((1, y.shape[0])), self.errors[-layer])
+			nabla_weights[-layer] = numpy.outer(self.outputs[-(layer + 1)].transpose(), self.errors[-layer]) # error at current layer is k-by-n
+			nabla_biases[-layer] = numpy.dot(numpy.ones((1, y.shape[0])), self.errors[-layer])
+		# end #
+	
+		return (nabla_weights, nabla_biases)
 	## end ##
 
 	def updateWeights(self, batchSize, dataBatch, labelBatch, stepSize):
@@ -71,17 +77,18 @@ class MyOneLayerFullyConnectedNet:
 		self.feedForward(dataBatch)
 
 		# Go backward
-		self.backPropagate(labelBatch)
+		nabla_weights, nabla_biases = self.backPropagate(labelBatch)
+		
+		return (nabla_weights, nabla_biases)
 	## end ##
 
-	def stochasticMiniBatchGradientDescentWithMomentum(self, miniBatchSize = 100, stepSize = 0.01, epoch = 1000, gamma = 0.7):
+	def mySDGwithMomentum(self, miniBatchSize = 100, stepSize = 0.01, epoch = 1000, gamma = 0.7):
 		# Get the size of the data.
 		dataSize = self.train_data.shape[0]
 	
 		# setup the network
 		self.setup(miniBatchSize)
-			
-		
+					
 		for itr in range(epoch):
 			print 'Epoch:', itr
 			randSerie = numpy.random.randint(dataSize, size = dataSize)
@@ -94,21 +101,15 @@ class MyOneLayerFullyConnectedNet:
 				miniBatchLabel = self.train_label[randSerie[i * miniBatchSize : i * miniBatchSize + miniBatchSize]]
 
 				# Get Increment
-				self.updateWeights(miniBatchSize , miniBatchData, miniBatchLabel, stepSize)
+				nabla_weights, nabla_biases = self.getIncrements(miniBatchSize , miniBatchData, miniBatchLabel, stepSize)
 
-				# Updata weights
-				for k in range(len(self.momentum_w)):
-					self.weights[k] = (self.weights[k] + self.momentum_w[k])
-					self.biases[k] = self.biases[k] + self.momentum_b[k]
+				# Update weights
+				for layer in range(self.numOfLayers - 1):
+					self.weights[layer] = self.weights[layer] - (gamma * preIncrementW[layer] + (1 - gamma) * (-setpSize * nabla_weights[layer]))
+					preIncrementW[layer] = (gamma * preIncrementW[layer] + (1 - gamma) * setpSize * nabla_weights[layer])
+					self.biases[layer] = self.biases[layer] - (gamma * preIncrementB[layer] + (1 - gamma) * (-stepSize * nabla_biases[layer]))
+					prrIncrementB[layer] = (gamma * preIncrementB[layer] + (1 - gamma) * stepSize * nabla_biases[layer]
 				# end #
-
-			# end #
-
-			#for k in range(len(self.momentum_w)):
-			#	self.weights[k] = self.weights[k] / numOfBatch
-			#	self.biases[k] = self.biases[k] / numOfBatch
-			## end #
-
 		# end #
 	## end ##
 
