@@ -48,31 +48,33 @@ class MyOneLayerFullyConnectedNet:
 		self.outputs[0] = x
 		for i in range(1, self.numOfLayers):
 			self.inputs[i] = numpy.dot(self.outputs[i-1], self.weights[i-1]) + numpy.dot(numpy.ones((x.shape[0], 1)), self.biases[i-1])
+			#print "output at layer", i - 1, self.outputs[i-1]
+			#print "input at layer:", i, "\n", self.inputs[i]
 			self.outputs[i] = self.activationFunction[i](self.inputs[i])
 		# end #
 	## end ##
 
 	## My backpropagation is used to calculate all errors at once. ##
-	def getIncrements(self, y):
+	def backPropagate(self, y):
 		nabla_weights = [numpy.zeros(w.shape) for w in self.weights]
 		nabla_biases = [numpy.zeros(b.shape) for b in self.biases]
 
 		# Calculate error for the output layer, it is matrix operation
 		self.errors[-1] = self.outputs[-1] - y
-		nabla_biases[-1] = self.errors[-1]
+		nabla_biases[-1] = numpy.dot(numpy.ones((1, y.shape[0])), self.errors[-1])
 		nabla_weights[-1] = numpy.dot(self.outputs[-2].transpose(), self.errors[-1])
 
 		for layer in range(2, self.numOfLayers):
 			activPrime  = self.activationPrime[-layer](self.inputs[-layer])
 			self.errors[-layer] = numpy.dot(self.errors[-(layer - 1)], self.weights[-(layer - 1)].transpose()) * activPrime # activPrime is k-by-n
-			nabla_weights[-layer] = numpy.outer(self.outputs[-(layer + 1)].transpose(), self.errors[-layer]) # error at current layer is k-by-n
+			nabla_weights[-layer] = numpy.dot(self.outputs[-(layer + 1)].transpose(), self.errors[-layer]) # error at current layer is k-by-n
 			nabla_biases[-layer] = numpy.dot(numpy.ones((1, y.shape[0])), self.errors[-layer])
 		# end #
 	
 		return (nabla_weights, nabla_biases)
 	## end ##
 
-	def updateWeights(self, batchSize, dataBatch, labelBatch, stepSize):
+	def getIncrements(self, batchSize, dataBatch, labelBatch, stepSize):
 		# Go forward
 		self.feedForward(dataBatch)
 
@@ -82,20 +84,24 @@ class MyOneLayerFullyConnectedNet:
 		return (nabla_weights, nabla_biases)
 	## end ##
 
-	def mySDGwithMomentum(self, miniBatchSize = 100, stepSize = 0.01, epoch = 1000, gamma = 0.7):
+	def mySDGwithMomentum(self, miniBatchSize = 50, stepSize = 0.001, epoch = 50, gamma = 0.9):
 		# Get the size of the data.
 		dataSize = self.train_data.shape[0]
 	
 		# setup the network
-		self.setup(miniBatchSize)
+		self.settings(miniBatchSize)
+
+		# setup momentum
+		momentumW = [numpy.zeros(w.shape) for w in self.weights]
+		momentumB = [numpy.zeros(b.shape) for b in self.biases]
 					
-		for itr in range(epoch):
+		for itr in range(epoch): #in range(0, 2): #
 			print 'Epoch:', itr
 			randSerie = numpy.random.randint(dataSize, size = dataSize)
 			numOfBatch = dataSize / miniBatchSize
 
 			# Start batch gradient descent
-			for i in range(numOfBatch):
+			for i in range(numOfBatch): # in range(0, 1): #
 				# Extract my mini-batch randomly
 				miniBatchData = self.train_data[randSerie[i * miniBatchSize : i * miniBatchSize + miniBatchSize]]
 				miniBatchLabel = self.train_label[randSerie[i * miniBatchSize : i * miniBatchSize + miniBatchSize]]
@@ -105,17 +111,19 @@ class MyOneLayerFullyConnectedNet:
 
 				# Update weights
 				for layer in range(self.numOfLayers - 1):
-					self.weights[layer] = self.weights[layer] - (gamma * preIncrementW[layer] + (1 - gamma) * (-setpSize * nabla_weights[layer]))
-					preIncrementW[layer] = (gamma * preIncrementW[layer] + (1 - gamma) * setpSize * nabla_weights[layer])
-					self.biases[layer] = self.biases[layer] - (gamma * preIncrementB[layer] + (1 - gamma) * (-stepSize * nabla_biases[layer]))
-					prrIncrementB[layer] = (gamma * preIncrementB[layer] + (1 - gamma) * stepSize * nabla_biases[layer]
+					momentumW[layer] = gamma * momentumW[layer] -stepSize * nabla_weights[layer] / miniBatchSize
+					self.weights[layer] = self.weights[layer] + momentumW[layer]
+					momentumB[layer] = gamma * momentumB[layer] -stepSize * nabla_biases[layer] / miniBatchSize
+					self.biases[layer] = self.biases[layer] + momentumB[layer]
 				# end #
+
+				print "second layer weights: \n", self.weights[-1];
 		# end #
 	## end ##
 
-	## Heler method for re-initiate
-	def setup(self, batchSize):
-		# clear matrices used previously.
+	## Heler method for initiate
+	def settings(self, batchSize = 100):
+		# clear matrices used previously
 		self.weights = [] 
 		self.biases = [] 
 		self.inputs = []
@@ -127,8 +135,8 @@ class MyOneLayerFullyConnectedNet:
 			# Weight matrices should be m-by-n
 			m = self.numOfNeuronsForAllLayers[layer] # input dim
 			n =  self.numOfNeuronsForAllLayers[layer+1] # output dim
-			self.weights.append(numpy.random.normal(0, 1, (m, n)))
-			self.biases.append(numpy.random.normal(0, 1, (1, n)))
+			self.weights.append(numpy.random.normal(0, 1, (m, n))/3072)
+			self.biases.append(numpy.random.normal(0, 1, (1, n))/3072)
 			self.inputs.append(numpy.zeros((batchSize,n)))
 			self.outputs.append(numpy.zeros((batchSize, m)))
 			self.errors.append(numpy.zeros((batchSize, m)))
