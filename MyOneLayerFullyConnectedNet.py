@@ -19,17 +19,11 @@ class MyOneLayerFullyConnectedNet:
 	##      equals to the number of layers. Each element is a tuple
 	##	containing three kind of information, number of neurons,
 	##      activation function, and derivative of activation function.
-	def __init__(self, train_data, train_label, test_data, test_label, param, loss, lossPrime):
+	def __init__(self, train_data, train_label, test_data, test_label):
 		self.train_data = train_data # input data are all row vector
 		self.train_label = train_label # output
 		self.test_data = test_data
 		self.test_label = test_label
-		self.numOfLayers = len(param)
-		self.numOfNeuronsForAllLayers = [attr[0] for attr in param] # one-hidden
-		self.activationFunction = [attr[1] for attr in param]
-		self.activationPrime = [attr[2] for attr in param]
-		self.lossFunction = loss
-		self.lossPrime = lossPrime
 		self.build()
 	## end ##
 
@@ -84,24 +78,24 @@ class MyOneLayerFullyConnectedNet:
 		return (nabla_weights, nabla_biases)
 	## end ##
 
-	def mySDGwithMomentum(self, miniBatchSize = 50, stepSize = 0.005, epoch = 50, gamma = 0.7):
+	def mySDGwithMomentum(self, param, loss, lossPrime, miniBatchSize = 50, stepSize = 0.005, epoch = 50, gamma = 0.7):
 		# Get the size of the data.
 		dataSize = self.train_data.shape[0]
 	
 		# setup the network
-		self.settings(miniBatchSize)
+		self.settings(param, loss, lossPrime, miniBatchSize)
 
 		# setup momentum
 		momentumW = [numpy.zeros(w.shape) for w in self.weights]
 		momentumB = [numpy.zeros(b.shape) for b in self.biases]
 					
-		for itr in range(epoch): #in range(0, 2): #
+		for itr in range(epoch): 
 			print 'Epoch:', itr
 			randSerie = numpy.random.randint(dataSize, size = dataSize)
 			numOfBatch = dataSize / miniBatchSize
 
 			# Start batch gradient descent
-			for i in range(numOfBatch): # in range(0, 1): #
+			for i in range(numOfBatch): 
 				# Extract my mini-batch randomly
 				miniBatchData = self.train_data[randSerie[i * miniBatchSize : i * miniBatchSize + miniBatchSize]]
 				miniBatchLabel = self.train_label[randSerie[i * miniBatchSize : i * miniBatchSize + miniBatchSize]]
@@ -116,25 +110,32 @@ class MyOneLayerFullyConnectedNet:
 					momentumB[layer] = gamma * momentumB[layer] -stepSize * nabla_biases[layer] / miniBatchSize
 					self.biases[layer] = self.biases[layer] + momentumB[layer]
 				# end #
-
-				# print "second layer weights: \n", self.weights[-1]
+			# end #
+				
 			# Training Acc and Error Calculation
-
 			acc = self.prediction(self.train_data, self.train_label)
+			loss = self.evaluation(self.train_data, self.train_label)
 			print "Training Acc: ", acc
+			print "Training Loss: ", loss
 
 		# end #
 	## end ##
 
 	## Heler method for initiate
-	def settings(self, batchSize = 100):
+	def settings(self, param, loss, lossPrime, batchSize = 100):
+		self.numOfLayers = len(param)
+		self.numOfNeuronsForAllLayers = [attr[0] for attr in param] # one-hidden
+		self.activationFunction = [attr[1] for attr in param]
+		self.activationPrime = [attr[2] for attr in param]
+		self.lossFunction = loss
+		self.lossPrime = lossPrime
+
 		# clear matrices used previously
 		self.weights = [] 
 		self.biases = [] 
 		self.inputs = []
 		self.outputs = []
 		self.errors = []
-
 		# Initiate Weights using variable
 		for layer in range(self.numOfLayers - 1):
 			# Weight matrices should be m-by-n
@@ -155,7 +156,6 @@ class MyOneLayerFullyConnectedNet:
 	## end ##
 
 	## Data should be predicted one by one.
-	## I do not support batch prediction for now
 	def prediction(self, data, label):
 		self.feedForward(data)
 		predict = numpy.zeros((data.shape[0], 1))
@@ -166,6 +166,12 @@ class MyOneLayerFullyConnectedNet:
 		
 		return acc
 	## end ##
-
-
+	
+	## evaluate objective
+	def evaluation(self, data, label):
+		self.feedForward(data)
+		print "output: ", self.outputs[-1]
+		loss = self.lossFunction(self.outputs[-1], label)
+		return loss.mean(0)
+	## end ##
 ### end ###
