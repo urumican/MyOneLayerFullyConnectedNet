@@ -103,9 +103,9 @@ class MyOneLayerFullyConnectedNet:
 
 				# Update weights
 				for layer in range(self.numOfLayers - 1):
-					momentumW[layer] = gamma * momentumW[layer] -stepSize * nabla_weights[layer] / miniBatchSize
+					momentumW[layer] = gamma * momentumW[layer] - stepSize * nabla_weights[layer] / miniBatchSize
 					self.weights[layer] = self.weights[layer] + momentumW[layer]
-					momentumB[layer] = gamma * momentumB[layer] -stepSize * nabla_biases[layer] / miniBatchSize
+					momentumB[layer] = gamma * momentumB[layer] - stepSize * nabla_biases[layer] / miniBatchSize
 					self.biases[layer] = self.biases[layer] + momentumB[layer]
 				# end #
 			# end #
