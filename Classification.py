@@ -1,39 +1,10 @@
 import numpy
-from MyOneLayerFullyConnectedNet import *
 import cPickle
 from scipy.special import expit
 
-def relu(x):
-	tmp = x
-	#print tmp
-	tmp[numpy.where(tmp <= 0)] = 0;
-	return tmp
-# end #
-
-def relu_prime(x):
-	tmp = x;
-	tmp[numpy.where(tmp <= 0)] = 0
-	tmp[numpy.where(tmp > 0)] = 1
-	return tmp
-# end #
-
-
-def crossEntropy(x, y):
-	#print 'output:', x
-	return - y * numpy.log(x) - (1.0 - y) * numpy.log(1.0 - x)
-# end #
-
-def corssEngtropyPrime(x, y):
-	return (y - x) / (x * (1.0 - x))
-# end # 
-
-def sigmoid(x):
-	return (1.0 / (1.0 + numpy.exp(-x)))
-# end #
-
-def sigmoid_prime(x):
-	return numpy.exp(-x) / (1.0 + numpy.exp(-x))**2
-
+# import my scripts
+from MyOneLayerFullyConnectedNet import *
+from myFunctions import *
 
 def main():
 	# Import data
@@ -47,14 +18,19 @@ def main():
 	#test_data = dic['test_data'] / 255
 	test_label = dic['test_labels'] 
 
+	# Create new net
+	net = MyOneLayerFullyConnectedNet(train_data, train_label, test_data, test_label)
+
+
+	for stepSIze in range(0.001, 1, 0.002):
+		for gamma in 
 	# Create layer-level parameter
 	# Parameter format:
 	# [num, activation function, derivative of activation function]
 	specification = ((train_data.shape[1], 0, 0), (10, relu, relu_prime), (1, expit, sigmoid_prime))	
-	
-	# Create new net
-	net = MyOneLayerFullyConnectedNet(train_data, train_label, test_data, test_label, specification, crossEntropy, corssEngtropyPrime)
-	net.mySDGwithMomentum()
+
+	# Start calculation
+	net.mySDGwithMomentum(param = specification, loss = crossEntropy, lossPrime = corssEngtropyPrime)
 	
 # end #
 
