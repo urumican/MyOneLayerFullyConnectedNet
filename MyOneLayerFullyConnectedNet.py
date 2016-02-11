@@ -42,8 +42,6 @@ class MyOneLayerFullyConnectedNet:
 		self.outputs[0] = x
 		for i in range(1, self.numOfLayers):
 			self.inputs[i] = numpy.dot(self.outputs[i-1], self.weights[i-1]) + numpy.dot(numpy.ones((x.shape[0], 1)), self.biases[i-1])
-			#print "output at layer", i - 1, self.outputs[i-1]
-			#print "input at layer:", i, "\n", self.inputs[i]
 			self.outputs[i] = self.activationFunction[i](self.inputs[i])
 		# end #
 	## end ##
