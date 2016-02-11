@@ -84,7 +84,7 @@ class MyOneLayerFullyConnectedNet:
 		return (nabla_weights, nabla_biases)
 	## end ##
 
-	def mySDGwithMomentum(self, miniBatchSize = 50, stepSize = 0.001, epoch = 50, gamma = 0.9):
+	def mySDGwithMomentum(self, miniBatchSize = 50, stepSize = 0.005, epoch = 50, gamma = 0.7):
 		# Get the size of the data.
 		dataSize = self.train_data.shape[0]
 	
@@ -117,7 +117,12 @@ class MyOneLayerFullyConnectedNet:
 					self.biases[layer] = self.biases[layer] + momentumB[layer]
 				# end #
 
-				print "second layer weights: \n", self.weights[-1];
+				# print "second layer weights: \n", self.weights[-1]
+			# Training Acc and Error Calculation
+
+			acc = self.prediction(self.train_data, self.train_label)
+			print "Training Acc: ", acc
+
 		# end #
 	## end ##
 
@@ -151,12 +156,15 @@ class MyOneLayerFullyConnectedNet:
 
 	## Data should be predicted one by one.
 	## I do not support batch prediction for now
-	def prediction(self, data):
-		out = self.feedForward(data)
-		if out > 1 - out:
-			return (1, out)
-		else:
-			return (0, out)
+	def prediction(self, data, label):
+		self.feedForward(data)
+		predict = numpy.zeros((data.shape[0], 1))
+		predict[self.outputs[-1] > (numpy.ones((data.shape[0], 1)) - self.outputs[-1])] = 1
+		markCorrectAsOne = numpy.zeros((data.shape[0], 1))
+		markCorrectAsOne[numpy.where(predict == label)] = 1
+		acc = numpy.sum(markCorrectAsOne) / data.shape[0]
+		
+		return acc
 	## end ##
 
 
