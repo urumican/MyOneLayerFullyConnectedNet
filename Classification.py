@@ -3,42 +3,28 @@ from MyOneLayerFullyConnectedNet import *
 import cPickle
 from scipy.special import expit
 
-def identityFunc(x):
-	return x;
-# end #
-
-def identityFuncPrime(x):
-	return 1
-# end # 
-
 def relu(x):
-	return (numpy.absolute(x) + x) / 2
+	tmp = x
+	#print tmp
+	tmp[numpy.where(tmp <= 0)] = 0;
+	return tmp
 # end #
 
 def relu_prime(x):
-	xShape = x.shape
-	s = x[0]
-	ret = []
-	for i in range(xShape[1]):
-		if s[i] > 0:
-			ret.append(1.0)
-		elif s[i] == 0:
-			ret.append(0.5)
-		else: 
-			ret.append(0.0)
-	ret = numpy.array(ret)
-	ret.shape = xShape
-	return ret
+	tmp = x;
+	tmp[numpy.where(tmp <= 0)] = 0
+	tmp[numpy.where(tmp > 0)] = 1
+	return tmp
 # end #
 
 
 def crossEntropy(x, y):
 	#print 'output:', x
-	return y * numpy.log(x) + (1.0 - y) * numpy.log(1.0 - x)
+	return - y * numpy.log(x) - (1.0 - y) * numpy.log(1.0 - x)
 # end #
 
 def corssEngtropyPrime(x, y):
-	return (y / x) - (1.0 - y) / (1.0 - x)
+	return (y - x) / (x * (1.0 - x))
 # end # 
 
 def sigmoid(x):
@@ -49,14 +35,15 @@ def sigmoid_prime(x):
 	return numpy.exp(-x) / (1.0 + numpy.exp(-x))**2
 
 
-
 def main():
 	# Import data
 	dic = cPickle.load(open("cifar_2class_py2.p","rb"))
 	train_data = (dic['train_data'] - dic['train_data'].mean(0)) / dic['train_data'].std(0) 
+	train_data.shape = (10000, 3072)
 	#train_data = dic['train_data'] / 255
 	train_label = dic['train_labels']	
 	test_data = (dic['test_data'] - dic['test_data'].mean(0)) / dic['test_data'].std(0)
+	test_data.shape = (2000, 3072)
 	#test_data = dic['test_data'] / 255
 	test_label = dic['test_labels'] 
 
@@ -67,7 +54,7 @@ def main():
 	
 	# Create new net
 	net = MyOneLayerFullyConnectedNet(train_data, train_label, test_data, test_label, specification, crossEntropy, corssEngtropyPrime)
-	net.stochasticMiniBatchGradientDescentWithMomentum()
+	net.mySDGwithMomentum()
 	
 # end #
 
